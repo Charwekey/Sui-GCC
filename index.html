@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sui Content Challenge Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'sui-dark': '#020617',
+                        'sui-blue': '#1e3a8a',
+                        'cyan-500': '#06b6d4',
+                        'blue-600': '#2563eb',
+                        'ghana-red': '#CE1126',
+                        'ghana-gold': '#FCD116',
+                        'ghana-green': '#007A5E',
+                    },
+                }
+            }
+        }
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script async src="https://platform.twitter.com/widgets.js"></script>
+    <link rel="stylesheet" href="src/style.css">
+    <link rel="shortcut icon" href="images/images-removebg-preview.png" type="image/x-icon">
+</head>
+<body class="min-h-screen bg-gradient-to-br from-sui-dark to-sui-blue to-sui-dark relative overflow-x-hidden">
+    <!-- Water Droplets Background -->
+    <div id="waterDroplets" class="fixed inset-0 pointer-events-none overflow-hidden z-0"></div>
+
+    <!-- Blockchain Visualization -->
+    <svg class="blockchain-bg">
+        <defs>
+            <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" style="stop-color:#06b6d4;stop-opacity:1" />
+                <stop offset="100%" style="stop-color:#3b82f6;stop-opacity:1" />
+            </linearGradient>
+        </defs>
+        <g class="animate-slow-move">
+            <rect x="100" y="100" width="100" height="100" fill="none" stroke="url(#gradient)" stroke-width="2"/>
+            <rect x="300" y="200" width="100" height="100" fill="none" stroke="url(#gradient)" stroke-width="2"/>
+            <rect x="500" y="150" width="100" height="100" fill="none" stroke="url(#gradient)" stroke-width="2"/>
+            <path d="M200 150 L300 250" stroke="url(#gradient)" stroke-width="2"/>
+            <path d="M400 250 L500 200" stroke="url(#gradient)" stroke-width="2"/>
+            <rect x="700" y="300" width="100" height="100" fill="none" stroke="url(#gradient)" stroke-width="2"/>
+            <path d="M600 200 L700 350" stroke="url(#gradient)" stroke-width="2"/>
+        </g>
+    </svg>
+
+    <!-- Main Container -->
+    <div class="relative z-10">
+        <!-- Header -->
+        <header class="bg-slate-900/80 backdrop-blur-xl border-b border-cyan-500/30 sticky top-0 z-40">
+            <div class="container mx-auto px-4 py-6">
+                <div class="flex items-center justify-between flex-wrap gap-4">
+                    <div class="flex items-center gap-4">
+                        <div class="w-9 h-9  rounded-xl flex items-center justify-center glow">
+                          <img src="images/images-removebg-preview.png" alt="">
+                        </div>
+                        <div>
+                            <h1 class="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-500">
+                                Sui Network Ghana
+                            </h1>
+                            <p class="text-cyan-300 text-sm">Content Challenge Dashboard</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-2 bg-cyan-500/20 rounded-full px-4 py-2">
+                        <div class="w-2 h-2 bg-cyan-400 rounded-full animate-pulse"></div>
+                        <span class="text-cyan-300 text-sm">Live Tracking</span>
+                    </div>
+                    <button id="refresh-btn" class="px-4 py-2 bg-gradient-to-r from-cyan-500 to-blue-600 text-white rounded-lg hover:from-cyan-600 hover:to-blue-700">Refresh Data</button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="container mx-auto px-4 py-12">
+            <!-- Title Section -->
+            <div class="mb-12 text-center">
+                <h2 class="text-4xl md:text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-500 mb-4">
+                    20-Day Challenge Tracker
+                </h2>
+                <p class="text-cyan-300 text-lg max-w-2xl mx-auto">
+                    Follow the journey of our amazing participants as they create content every day. 
+                    Like water flowing through the Sui network, creativity never stops. 💧
+                </p>
+            </div>
+
+            <!-- Summary Cards -->
+            <div id="summary-section" class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-12">
+                <div class="bg-gradient-to-br from-slate-900/90 to-slate-800/90 backdrop-blur-xl rounded-3xl p-6 border border-cyan-500/30 shadow-2xl text-center">
+                    <h3 class="text-xl font-semibold text-cyan-300">Total Participants</h3>
+                    <p id="total-participants" class="text-3xl font-bold text-cyan-400">0</p>
+                </div>
+                <div class="bg-gradient-to-br from-slate-900/90 to-slate-800/90 backdrop-blur-xl rounded-3xl p-6 border border-cyan-500/30 shadow-2xl text-center">
+                    <h3 class="text-xl font-semibold text-cyan-300">Total Posts</h3>
+                    <p id="total-posts" class="text-3xl font-bold text-cyan-400">0</p>
+                </div>
+                <div class="bg-gradient-to-br from-slate-900/90 to-slate-800/90 backdrop-blur-xl rounded-3xl p-6 border border-cyan-500/30 shadow-2xl text-center">
+                    <h3 class="text-xl font-semibold text-cyan-300">Average Completion</h3>
+                    <p id="avg-completion" class="text-3xl font-bold text-cyan-400">0%</p>
+                </div>
+            </div>
+
+            <!-- Loading Indicator -->
+            <div id="loading" class="text-center py-12">
+                <div class="inline-block w-16 h-16 border-4 border-cyan-500 border-t-transparent rounded-full animate-spin"></div>
+                <p class="text-cyan-300 mt-4">Loading participants...</p>
+            </div>
+
+            <!-- Error Message -->
+            <div id="error" class="hidden text-center py-12 text-red-400">
+                <p>Failed to load data. Please try again.</p>
+                <button id="retry-btn" class="mt-4 px-6 py-3 bg-gradient-to-r from-cyan-500 to-blue-600 text-white rounded-xl hover:from-cyan-600 hover:to-blue-700">Retry</button>
+            </div>
+
+            <!-- Empty State -->
+            <div id="empty" class="hidden text-center py-12 text-cyan-300">
+                <p class="text-2xl font-bold mb-4">No Participants Yet</p>
+                <p>Share the form and let's get the challenge started! 🚀</p>
+            </div>
+
+            <!-- Participants Grid -->
+            <div id="participant-grid" class="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6 mb-12 hidden"></div>
+
+            <!-- Analytics Section -->
+            <div id="analytics" class="bg-gradient-to-br from-slate-900/90 to-slate-800/90 backdrop-blur-xl rounded-3xl p-8 border border-cyan-500/30 hidden">
+                <div class="flex items-center justify-between mb-6">
+                    <h3 class="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-500">
+                        Engagement Analytics
+                    </h3>
+                    <select id="metric-select" class="bg-slate-800/50 border border-cyan-500/30 rounded-lg px-4 py-2 text-cyan-300">
+                        <option value="completion">Completion %</option>
+                        <option value="posts">Total Posts</option>
+                    </select>
+                </div>
+                <canvas id="analytics-chart" class="w-full h-64"></canvas>
+            </div>
+        </main>
+
+        <!-- Footer -->
+        <footer class="bg-slate-900/80 backdrop-blur-xl border-t border-cyan-500/30 py-8 mt-12">
+            <div class="container mx-auto px-4 text-center">
+                <p class="text-cyan-300">Built with 💧 for the Sui Content Challenge</p>
+                <p class="text-cyan-500 text-sm mt-2">Powered by HTML, Tailwind CSS & JavaScript</p>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Modal for Expanded View -->
+    <div id="modal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-50 items-center justify-center p-4 modal-overlay">
+        <div class="modal-content relative bg-gradient-to-br from-slate-900 to-slate-800 rounded-3xl p-8 max-w-2xl w-full border border-cyan-500/50 shadow-2xl overflow-hidden">
+            <div class="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-cyan-400/20 to-blue-600/20 rounded-full blur-3xl"></div>
+            
+            <button id="close-modal" class="absolute top-4 right-4 p-2 bg-slate-800/80 rounded-full hover:bg-slate-700 transition-colors z-10">
+                <svg class="w-6 h-6 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+            </button>
+
+            <div class="relative" id="modal-content"></div>
+        </div>
+    </div>
+
+   <script src="src/app.js"></script>
+</body>
+</html>
